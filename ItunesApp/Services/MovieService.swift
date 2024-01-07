@@ -7,14 +7,18 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 protocol MovieServiceProtocol {
     //    func searchMovie2(args:[String:String])-> AnyPublisher<MovieResults,Error>
     func searchMovie(term:String,country:String?,limit:Int?)-> AnyPublisher<BaseResults<Movie>,Error>
-    func lookupMovie(amgVideoId:String)-> AnyPublisher<BaseResults<Movie>,Error>
+    func lookupMovie(amgVideoId:String) -> AnyPublisher<BaseResults<Movie>,Error>
+    func saveLocal(movie:Movie,onSuccess:@escaping (Movie)->Void)
+    func readLocal(onSuccess:@escaping (Movie)->Void)
 }
 
 final class MovieService : MovieServiceProtocol{
+    
     
     func lookupMovie(amgVideoId: String) -> AnyPublisher<BaseResults<Movie>, Error> {
         let args : [String:String] = ["amgVideoId":amgVideoId]
@@ -33,5 +37,14 @@ final class MovieService : MovieServiceProtocol{
         return NetworkLayer.shared.request(router: .search, args: args)
     }
     
+    func saveLocal(movie:Movie,onSuccess:@escaping (Movie)->Void){
+        let helper = CoreDataHelper.shared
+        helper.create(type: movie) { m in
+            <#code#>
+        }
+    }
     
+    func readLocal(onSuccess:@escaping (Movie)->Void){
+//        DBManager.read(proccess: () {})
+    }
 }
