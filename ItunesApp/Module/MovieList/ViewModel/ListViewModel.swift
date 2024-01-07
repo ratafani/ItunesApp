@@ -9,18 +9,22 @@ import UIKit
 import Combine
 
 protocol ListViewModelProtocol {
-    func cellForRowAt(_ index: Int) -> Movie
+    func cellForRowAt(_ index: Int) -> Movie?
     func numberOfRows() -> Int
     func viewDidLoad()
     func search(term:String,lim:Int?,country:String?)
     func reset()
     func isSearch()
     func isListStyle()
+    func favoriteForRowAt(_ index: Int)
 }
 
 class ListViewModel : ObservableObject,ListViewModelProtocol{
     
+    
+    
     @Published var movies: [Movie] = []
+    @Published var localMovies: [Movie] = []
     @Published var isSearching : Bool = false
     @Published var isListStyleTable : Bool = true
     
@@ -30,10 +34,16 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
     
     init( view: MainViewProtocol) {
         self.view = view
+        reset()
     }
     
-    func cellForRowAt(_ index: Int) -> Movie {
-        movies[index]
+    func cellForRowAt(_ index: Int) -> Movie? {
+        if movies.count > index{
+            return movies[index]
+        }else{
+            return nil
+        }
+        
     }
     
     func numberOfRows() -> Int {
@@ -61,6 +71,7 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
     }
     
     func search(term:String,lim:Int? = nil,country:String? = nil){
+        reset()
         service.searchMovie(term: term, country: country, limit: lim)
             .receive(on: DispatchQueue.global(qos: .background))
             .sink { completion in
@@ -73,18 +84,40 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
                 guard let self = self else {return}
                 DispatchQueue.main.async {
                     UIView.animate(withDuration: 1) {
-                        self.movies = first.results
+                        let res = first.results
+                        
+                        self.movies = res
+                        self.getFavorites()
                     }
                 }
             }
             .store(in: &cancellables)
     }
     
+    func getFavorites(){
+        let res = self.movies.reduce([]) { (result, movie) -> [Movie] in
+            var updatedResult = result
+            
+            let arg = self.localMovies.filter({
+                return $0.trackID == movie.trackID})
+            
+            if !arg.isEmpty{
+                updatedResult.append(contentsOf: arg)
+            }else{
+                updatedResult.append(movie)
+            }
+            
+            return updatedResult
+        }
+        self.movies = res.sorted(by: {$0.isFavorites && !$1.isFavorites})
+    }
     
     func reset() {
         DispatchQueue.main.async {
-            UIView.animate(withDuration: 1) {
-                self.movies = []
+            self.movies = []
+            self.service.readLocal { [weak self] movies in
+                self?.localMovies = movies
+                self?.movies = self?.localMovies ?? []
             }
         }
     }
@@ -121,8 +154,33 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .removeDuplicates()
             .sink{ val in
+                
                 onListen(val)
             }
             .store(in: &cancellables)
+    }
+    
+    func reloadData(){
+        
+        self.movies = movies.sorted(by: {$0.isFavorites && !$1.isFavorites})
+    }
+    func favoriteForRowAt(_ index: Int) {
+        if movies.count > index{
+            movies[index].isFavorites.toggle()
+            if movies[index].isFavorites{
+                service.saveLocal(movie: movies[index]) { [weak self] movie in
+                    guard let self else {return}
+                    self.reloadData()
+                }
+            }else{
+                service.deleteLocal(movie: movies[index]) { [weak self] val in
+                    guard let self else {return}
+                    self.reloadData()
+                }
+            }
+            
+            
+        }
+        
     }
 }

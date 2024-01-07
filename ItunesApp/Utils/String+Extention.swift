@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+extension String {
+    func limit(num:Int) -> String {
+        if self.count>num{
+            return dropLast(num) + "***"
+        }
+        return self
+    }
+}

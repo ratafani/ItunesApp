@@ -1,14 +1,15 @@
 
 import Foundation
-
+import CoreData
 
 
 // MARK: - Result
 struct Movie: Codable,Equatable {
-    let wrapperType: WrapperType
-    let kind: Kind
+    var id: NSManagedObjectID = NSManagedObjectID()
+    let wrapperType: WrapperType?
+    let kind: Kind?
     let collectionID: Int?
-    let trackID: Int
+    let trackID: Int?
     let artistName: String?
     let collectionName: String?
     let trackName: String?
@@ -18,13 +19,13 @@ struct Movie: Codable,Equatable {
     let collectionArtistViewURL, collectionViewURL: String?
     let trackViewURL: String?
     let previewURL: String?
-    let artworkUrl30, artworkUrl60, artworkUrl100: String
+    let artworkUrl30, artworkUrl60, artworkUrl100: String?
     let collectionPrice, trackPrice: Double?
     let trackRentalPrice: Double?
     let collectionHDPrice, trackHDPrice: Double?
     let trackHDRentalPrice: Double?
     let releaseDate: String?
-    let collectionExplicitness, trackExplicitness: Explicitness
+    let collectionExplicitness, trackExplicitness: Explicitness?
     let trackCount, trackNumber: Int?
     let trackTimeMillis: Int?
     let country: String?
@@ -36,8 +37,10 @@ struct Movie: Codable,Equatable {
     let hasITunesExtras: Bool?
     let discCount, discNumber: Int?
     var isFavorites: Bool = false
+    
 
     enum CodingKeys: String, CodingKey {
+    
         case wrapperType, kind
         case collectionID = "collectionId"
         case trackID = "trackId"
@@ -53,6 +56,8 @@ struct Movie: Codable,Equatable {
         case trackHDRentalPrice = "trackHdRentalPrice"
         case releaseDate, collectionExplicitness, trackExplicitness, trackCount, trackNumber, trackTimeMillis, country, currency, primaryGenreName, contentAdvisoryRating, shortDescription, longDescription, hasITunesExtras, discCount, discNumber
     }
+    
+    
 }
 
 enum Explicitness: String, Codable {

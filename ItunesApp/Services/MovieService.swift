@@ -7,18 +7,17 @@
 
 import Foundation
 import Combine
-import SwiftUI
+import CoreData
 
 protocol MovieServiceProtocol {
-    //    func searchMovie2(args:[String:String])-> AnyPublisher<MovieResults,Error>
     func searchMovie(term:String,country:String?,limit:Int?)-> AnyPublisher<BaseResults<Movie>,Error>
     func lookupMovie(amgVideoId:String) -> AnyPublisher<BaseResults<Movie>,Error>
     func saveLocal(movie:Movie,onSuccess:@escaping (Movie)->Void)
-    func readLocal(onSuccess:@escaping (Movie)->Void)
+    func readLocal(onSuccess:@escaping ([Movie])->Void)
+    func deleteLocal(movie:Movie,onSuccess:@escaping (Bool)->Void)
 }
 
 final class MovieService : MovieServiceProtocol{
-    
     
     func lookupMovie(amgVideoId: String) -> AnyPublisher<BaseResults<Movie>, Error> {
         let args : [String:String] = ["amgVideoId":amgVideoId]
@@ -38,13 +37,38 @@ final class MovieService : MovieServiceProtocol{
     }
     
     func saveLocal(movie:Movie,onSuccess:@escaping (Movie)->Void){
-        let helper = CoreDataHelper.shared
-        helper.create(type: movie) { m in
-            <#code#>
+        let context = CoreDataHelper.shared.getContext()
+        CoreDataHelper.shared.create(type: MovieEntity.self) { (new: MovieEntity) in
+            new.update(with: movie)
+        }
+
+    }
+    
+    func readLocal(onSuccess:@escaping ([Movie])->Void){
+        CoreDataHelper.shared.fetch(type: MovieEntity.self, predicate: nil) { movies in
+            guard let movies = movies else {
+                onSuccess([])
+                return
+            }
+            onSuccess( movies.reduce([]) { (result, movieEntity) -> [Movie] in
+                var updatedResult = result
+                updatedResult.append(movieEntity.createMovie())
+                return updatedResult
+            })
+            
         }
     }
     
-    func readLocal(onSuccess:@escaping (Movie)->Void){
-//        DBManager.read(proccess: () {})
+    func deleteLocal(movie:Movie,onSuccess:@escaping (Bool)->Void){
+        do{
+            let obj =  try CoreDataHelper.shared.getContext().existingObject(with: movie.id)
+            CoreDataHelper.shared.delete(object: obj) { val in
+                onSuccess(val)
+            }
+        }catch{
+            
+        }
+        
+        
     }
 }

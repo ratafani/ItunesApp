@@ -27,7 +27,7 @@ class CoreDataHelper:CoreDataHelperProtocol{
     }
     
     lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "YourDataModel") // Replace with your data model name
+        let container = NSPersistentContainer(name: "Movies") // Replace with your data model name
         container.loadPersistentStores { (_, error) in
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")

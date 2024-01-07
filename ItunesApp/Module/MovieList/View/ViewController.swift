@@ -26,31 +26,43 @@ class ViewController: UIViewController,MainViewProtocol{
     
     var viewmodel: ListViewModelProtocol!
     
-    private lazy var tableView: UITableView = {
-        let tableView = UITableView()
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        return tableView
+    lazy var mCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.backgroundColor = .init(white: 1, alpha: 0.2)
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+        return collectionView
     }()
     
     var searchController: UISearchController!
     var styleButton : UIBarButtonItem!
+    var timer : Timer = Timer()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         viewmodel.viewDidLoad()
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        view.addSubview(tableView)
+//        view.addSubview(collectionView)
     }
     
     func configureView() {
         //setup table
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.frame = view.frame
+        mCollectionView.delegate = self
+        mCollectionView.dataSource = self
+        self.view.addSubview(self.mCollectionView)
+        mCollectionView.register(SmallCollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
+        mCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        mCollectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+        mCollectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        mCollectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        mCollectionView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
         
         //setup searchbar
         searchController = UISearchController(searchResultsController: nil)
@@ -79,8 +91,8 @@ class ViewController: UIViewController,MainViewProtocol{
             self.navigationItem.searchController = isSearch ? self.searchController : nil
             if self.viewmodel.numberOfRows()>0{
                 //if item exist, move back to up
-                let indexPath = IndexPath(row: 0, section: 0)
-                self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                
+                self.mCollectionView.scrollsToTop = true
             }
             if isSearch{
                 //go to search
@@ -130,7 +142,7 @@ class ViewController: UIViewController,MainViewProtocol{
     func reloadData() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {return}
-            self.tableView.reloadData()
+            self.mCollectionView.reloadData()
         }
     }
     
