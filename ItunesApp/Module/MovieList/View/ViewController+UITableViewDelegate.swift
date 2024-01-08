@@ -19,15 +19,14 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource,U
         guard let movie = self.viewmodel.cellForRowAt(indexPath.row) else{
             return cell
         }
-        cell.nameLabel.text = movie.trackName?.limit(num: 22)
+        cell.nameLabel.text = movie.trackName?.limit(num: 30)
         cell.rowImage.downloaded(from:movie.artworkUrl100 ?? ""){
             cell.rowImage.editImage()
             cell.rowImage.contentMode = .scaleAspectFill
             cell.favoriteButtonTap = {
-                self.viewmodel.favoriteForRowAt(indexPath.row)
+                self.viewmodel.favoriteForRowAt(movie)
             }
             cell.setFavoriteImagge(isFavorite: movie.isFavorites)
-
         }
         
         return cell
@@ -54,8 +53,11 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource,U
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let movie = self.viewmodel.cellForRowAt(indexPath.row) else {return}
-        
-        self.coordinator?.showDetail(movie: movie)
+        self.coordinator?.showDetail(movie: movie){ [weak self] m in
+            guard let self else {return}
+            self.viewmodel.changeListMovie(by: m)
+//            self.reloadData()
+        }
     }
 }
 

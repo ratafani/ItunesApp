@@ -37,8 +37,9 @@ class ViewController: UIViewController,MainViewProtocol{
         collectionView.dataSource = self
         collectionView.backgroundColor = .init(white: 1, alpha: 0.2)
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
-        
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+        collectionView.register(SmallCollectionViewCell.self, forCellWithReuseIdentifier: "Small")
+        collectionView.register(LargeCollectionViewCell.self, forCellWithReuseIdentifier: "Large")
         return collectionView
     }()
     
@@ -53,7 +54,6 @@ class ViewController: UIViewController,MainViewProtocol{
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-//        view.addSubview(collectionView)
     }
     
     func configureView() {
@@ -61,8 +61,6 @@ class ViewController: UIViewController,MainViewProtocol{
         mCollectionView.delegate = self
         mCollectionView.dataSource = self
         self.view.addSubview(self.mCollectionView)
-        mCollectionView.register(SmallCollectionViewCell.self, forCellWithReuseIdentifier: "Small")
-        mCollectionView.register(LargeCollectionViewCell.self, forCellWithReuseIdentifier: "Large")
         mCollectionView.translatesAutoresizingMaskIntoConstraints = false
         mCollectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
         mCollectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true

@@ -11,7 +11,6 @@ import UIKit
 extension ViewController : UISearchBarDelegate, UISearchDisplayDelegate, UISearchResultsUpdating,UISearchControllerDelegate{
     
     func updateSearchResults(for searchController: UISearchController) {
-        
         if let text = searchController.searchBar.text, (text.isEmpty == false){
             timer.invalidate()
             timer = Timer.scheduledTimer(timeInterval: 0.8, target: self, selector: #selector(output), userInfo: text, repeats: false)

@@ -7,11 +7,15 @@
 
 import UIKit
 
-class DetailViewController: UIViewController {
+protocol DetailViewControllerProtocol{
+    func setupUI()
+    func updateUI()
+}
+
+class DetailViewController: UIViewController,DetailViewControllerProtocol {
     
     // Movie data to display
-    var movie: Movie?
-    var viewModel : ListViewModelProtocol?
+    var viewModel : DetailViewModelProtocol?
 
     // UI components
     private let backgroundCircleView: UIView = {
@@ -26,7 +30,7 @@ class DetailViewController: UIViewController {
         let button = UIButton(type: .system)
         let starImage = UIImage(systemName: "star")
         button.setImage(starImage, for: .normal)
-        button.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
+        
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -58,9 +62,10 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         updateUI()
+        viewModel?.viewDidLoad()
     }
 
-    private func setupUI() {
+    func setupUI() {
         view.backgroundColor = .white
 
         // Add UI components to the view
@@ -69,6 +74,8 @@ class DetailViewController: UIViewController {
         view.addSubview(imageView)
         view.addSubview(titleLabel)
         view.addSubview(descriptionLabel)
+        
+        favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
 
         // Layout constraints
         NSLayoutConstraint.activate([
@@ -97,18 +104,23 @@ class DetailViewController: UIViewController {
         ])
     }
 
-    private func updateUI() {
-        guard let movie = movie else { return }
+    func updateUI() {
+        guard let movie = viewModel?.getMovie() else { return }
         // Update UI components with movie details
         imageView.downloaded(from: movie.artworkUrl100 ?? "") {
             
         }  // Replace with your image
         titleLabel.text = movie.trackName
         descriptionLabel.text = movie.longDescription
+        
+        if movie.isFavorites{
+            favoriteButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
+        }else{
+            favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
+        }
     }
 
     @objc private func favoriteButtonTapped() {
-        guard let movie = movie else {return}
-        viewModel?.favoriteForRowAt(movie)
+        viewModel?.favorite()
     }
 }

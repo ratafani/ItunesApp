@@ -16,8 +16,9 @@ protocol ListViewModelProtocol {
     func reset()
     func isSearch()
     func changeListStyle()
-    func favoriteForRowAt(_ index: Int)
+    func favoriteForRowAt(_ movie: Movie)
     func cellSize()->(CGFloat,String)
+    func changeListMovie(by movie:Movie)
 }
 
 enum ListLayoutStyle{
@@ -26,6 +27,8 @@ enum ListLayoutStyle{
 }
 
 class ListViewModel : ObservableObject,ListViewModelProtocol{
+    
+    
     
     @Published var movies: [Movie] = []
     @Published var localMovies: [Movie] = []
@@ -88,7 +91,6 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
                 DispatchQueue.main.async {
                     UIView.animate(withDuration: 1) {
                         let res = first.results
-                        
                         self.movies = res
                         self.getFavorites()
                     }
@@ -125,6 +127,7 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
         }
     }
     
+    
     func changeListStyle(){
         DispatchQueue.main.async {
             switch self.layoutStyle {
@@ -143,6 +146,7 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
             .sink{ val in
                 onListen(val)
             }
+            
             .store(in: &cancellables)
     }
     
@@ -167,13 +171,12 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
             .store(in: &cancellables)
     }
     
-    
-    
     func reloadData(){
-        
         self.movies = movies.sorted(by: {$0.isFavorites && !$1.isFavorites})
     }
-    func favoriteForRowAt(_ index: Int) {
+    
+    func favoriteForRowAt(_ movie: Movie){
+        guard let index = findMovie(movie: movie) else {return}
         if movies.count > index{
             movies[index].isFavorites.toggle()
             if movies[index].isFavorites{
@@ -188,7 +191,12 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
                 }
             }
         }
-        
+    }
+    
+    func findMovie(movie: Movie) -> Int?{
+        let m = self.movies.firstIndex(where: {$0.id == movie.id})
+        let index = m ?? 0
+        return index
     }
     
     func cellSize() -> (CGFloat,String) {
@@ -198,5 +206,10 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
         case .twoGrid:
             return (view.getViewFrame() / 2.255 ,"Large")
         }
+    }
+    
+    func changeListMovie(by movie: Movie) {
+        let arr = self.movies.map({$0.id == movie.id ? movie : $0})
+        self.movies = arr
     }
 }

@@ -18,6 +18,7 @@ protocol Coordinator{
 class MainCoordinator : Coordinator{
     var childCoordinator: [Coordinator] = []
     
+    
     var navigationController: UINavigationController = {
         var controller = UINavigationController()
         controller.navigationBar.prefersLargeTitles = false
@@ -37,9 +38,12 @@ class MainCoordinator : Coordinator{
         navigationController.pushViewController(mainVC, animated: false)
     }
 
-    func showDetail(movie : Movie){
-        let detailVC = ViewControllerProvider.detailViewController.raw as! DetailViewController
-        detailVC.movie = movie
+    func showDetail(movie : Movie,onListen: @escaping (Movie)->Void){
+        let detailVC = ViewControllerProvider.detailViewController(movie: movie).raw as! DetailViewController
+        
+        detailVC.viewModel?.listenToMovie{ m in
+            onListen(m)
+        }
         navigationController.pushViewController(detailVC, animated: true)
     }
 }
@@ -47,19 +51,21 @@ class MainCoordinator : Coordinator{
 
 enum ViewControllerProvider {
     case mainViewController
-    case detailViewController
+    case detailViewController(movie:Movie)
     
     var raw: UIViewController {
         
         switch self {
         case .mainViewController:
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let view = storyboard.instantiateViewController(identifier: "ListViewController") as! ViewController
-            let viewmodel = ListViewModel(view: view)
-            view.viewmodel = viewmodel
-            return view
-        case .detailViewController:
-            return DetailViewController()
+            let vc = storyboard.instantiateViewController(identifier: "ListViewController") as! ViewController
+            let viewmodel = ListViewModel(view: vc)
+            vc.viewmodel = viewmodel
+            return vc
+        case .detailViewController(let movie):
+            let vc = DetailViewController()
+            vc.viewModel = DetailViewModel(movie: movie,view: vc)
+            return vc
         }
      }
 }

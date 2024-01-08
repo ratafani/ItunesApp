@@ -62,27 +62,23 @@ class LargeCollectionViewCell: UICollectionViewCell,BaseCell {
         rowImage.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
         rowImage.topAnchor.constraint(equalTo: topAnchor).isActive = true
         rowImage.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-
-        nameLabel.bottomAnchor.constraint(equalTo: bottomAnchor,constant: -8).isActive = true
-        nameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16).isActive = true
-        nameLabel.widthAnchor.constraint(equalToConstant: 100).isActive = true
-        
         
         favorite.rightAnchor.constraint(equalTo: rightAnchor,constant: -16).isActive = true
         favorite.bottomAnchor.constraint(equalTo: bottomAnchor,constant: -8).isActive = true
         favorite.heightAnchor.constraint(equalToConstant: 25).isActive = true
         favorite.widthAnchor.constraint(equalToConstant: 25).isActive = true
         
+        nameLabel.bottomAnchor.constraint(equalTo: bottomAnchor,constant: -8).isActive = true
+        nameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16).isActive = true
+        nameLabel.rightAnchor.constraint(equalTo: favorite.leftAnchor, constant: 16).isActive = true
+        
         favorite.addTarget(self, action: #selector(pressedAction(_:)), for: .touchUpInside)
         
     }
     
-    
-    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
     
     @objc func pressedAction(_ sender: UIButton) {
        // do your stuff here
