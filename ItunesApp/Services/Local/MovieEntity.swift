@@ -11,6 +11,7 @@ import CoreData
 extension MovieEntity{
     func update(with movie:Movie){
         self.artworkUrl60 = movie.artworkUrl60
+        self.artworkUrl100 = movie.artworkUrl100
         self.longDescription = movie.longDescription
         self.trackName = movie.trackName
         self.isFavorite = movie.isFavorites
@@ -38,7 +39,7 @@ extension MovieEntity{
             previewURL: nil,
             artworkUrl30: "",
             artworkUrl60: self.artworkUrl60,
-            artworkUrl100: "",
+            artworkUrl100: self.artworkUrl100,
             collectionPrice: nil,
             trackPrice: nil,
             trackRentalPrice: nil,

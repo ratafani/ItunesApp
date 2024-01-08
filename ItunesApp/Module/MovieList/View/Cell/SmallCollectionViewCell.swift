@@ -7,17 +7,18 @@
 
 import UIKit
 
-class SmallCollectionViewCell: UICollectionViewCell {
+
+class SmallCollectionViewCell: UICollectionViewCell,BaseCell {
     
     
-    let rowImage: UIImageView = {
+    var rowImage: UIImageView = {
         let image = UIImageView()
         image.image = UIImage(systemName: "person.crop.circle")
         image.translatesAutoresizingMaskIntoConstraints = false
         return image
     }()
     
-    let nameLabel: UILabel = {
+    var nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 15)
         label.textColor = UIColor.black
@@ -27,7 +28,7 @@ class SmallCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    let favorite: UIButton = {
+    var favorite: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "star"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -76,7 +77,6 @@ class SmallCollectionViewCell: UICollectionViewCell {
     
     @objc func pressedAction(_ sender: UIButton) {
        // do your stuff here
-      
       favoriteButtonTap()
     }
     

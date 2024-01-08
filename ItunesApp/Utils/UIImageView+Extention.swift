@@ -9,7 +9,7 @@ import UIKit
 //onListen: @escaping (Bool)->Void
 extension UIImageView {
     func downloaded(from url: URL, contentMode mode: ContentMode = .scaleToFill, onSuccess:@escaping ()->Void) {
-//        contentMode = mode
+        //        contentMode = mode
         self.image = UIImage(systemName: "circle.dotted")
         URLSession.shared.dataTask(with: url) { data, response, error in
             guard
@@ -17,12 +17,12 @@ extension UIImageView {
                 let mimeType = response?.mimeType, mimeType.hasPrefix("image"),
                 let data = data, error == nil,
                 let image = UIImage(data: data)
-                else { return }
+            else { return }
             DispatchQueue.main.async() { [weak self] in
                 self?.image = image
                 onSuccess()
-//                self?.contentMode = .scaleAspectFill
-//                self?.asCircle()
+                //                self?.contentMode = .scaleAspectFill
+                //                self?.asCircle()
             }
         }.resume()
     }
@@ -33,10 +33,27 @@ extension UIImageView {
         }
     }
     
-    func asCircle(){
-          self.layer.cornerRadius = self.frame.width / 2;
-          self.layer.masksToBounds = true
+    func editImage(){
+        if self.frame.width > 50{
+            let view = UIView(frame: self.frame)
+            
+            let gradient = CAGradientLayer()
+            
+            gradient.frame = view.bounds
+            
+            gradient.colors = [UIColor.clear.cgColor, UIColor.black.withAlphaComponent(0.8).cgColor]
+            
+            gradient.locations = [0.5, 1.0]
+            
+            view.layer.insertSublayer(gradient, at: 0)
+            
+            self.addSubview(view)
+            self.bringSubviewToFront(view)
+        }
+        
+        self.layer.cornerRadius = 12/*self.frame.width / 2*/
         self.layer.masksToBounds = true
-      }
-
+        
+    }
+    
 }

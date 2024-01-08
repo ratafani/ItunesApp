@@ -37,7 +37,6 @@ final class MovieService : MovieServiceProtocol{
     }
     
     func saveLocal(movie:Movie,onSuccess:@escaping (Movie)->Void){
-        let context = CoreDataHelper.shared.getContext()
         CoreDataHelper.shared.create(type: MovieEntity.self) { (new: MovieEntity) in
             new.update(with: movie)
         }
@@ -68,7 +67,5 @@ final class MovieService : MovieServiceProtocol{
         }catch{
             
         }
-        
-        
     }
 }

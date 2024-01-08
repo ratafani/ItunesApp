@@ -12,7 +12,8 @@ protocol MainViewProtocol: AnyObject {
     func configureView()
     func reloadData()
     func updateSearchbar(isSearch:Bool)
-    func updateListStyle(isSearch:Bool)
+    func updateListStyle(layout:ListLayoutStyle)
+    func getViewFrame()->CGFloat
 }
 
 class ViewController: UIViewController,MainViewProtocol{
@@ -21,6 +22,8 @@ class ViewController: UIViewController,MainViewProtocol{
         var wasActive = false
         var wasFirstResponder = false
     }
+    
+    weak var coordinator : MainCoordinator?
     
     var restoredState = SearchControllerRestorableState()
     
@@ -35,6 +38,7 @@ class ViewController: UIViewController,MainViewProtocol{
         collectionView.backgroundColor = .init(white: 1, alpha: 0.2)
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
+        
         return collectionView
     }()
     
@@ -57,12 +61,14 @@ class ViewController: UIViewController,MainViewProtocol{
         mCollectionView.delegate = self
         mCollectionView.dataSource = self
         self.view.addSubview(self.mCollectionView)
-        mCollectionView.register(SmallCollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
+        mCollectionView.register(SmallCollectionViewCell.self, forCellWithReuseIdentifier: "Small")
+        mCollectionView.register(LargeCollectionViewCell.self, forCellWithReuseIdentifier: "Large")
         mCollectionView.translatesAutoresizingMaskIntoConstraints = false
         mCollectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
         mCollectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         mCollectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-        mCollectionView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+        mCollectionView.topAnchor.constraint(equalTo: self.view.topAnchor,constant: 100).isActive = true
+        
         
         //setup searchbar
         searchController = UISearchController(searchResultsController: nil)
@@ -74,14 +80,14 @@ class ViewController: UIViewController,MainViewProtocol{
         let search = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .plain, target: self, action:  #selector(self.onItemBarClick(_ :)))
         search.tag = 1
         
-        let favoritesButton = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action:  #selector(self.onItemBarClick(_ :)))
-        favoritesButton.tag = 3
+        //NOTE: wanted to have list of fatorites access here
+//        let favoritesButton = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action:  #selector(self.onItemBarClick(_ :)))
+//        favoritesButton.tag = 3
         
         styleButton = UIBarButtonItem(image: UIImage(systemName: "list.bullet.rectangle"), style: .plain, target: self, action:  #selector(self.onItemBarClick(_ :)))
         styleButton.tag = 2
     
         self.navigationItem.setRightBarButtonItems([search,styleButton], animated: false)
-        self.navigationItem.setLeftBarButtonItems([favoritesButton], animated: false)
         self.navigationItem.title = "List Movies"
         
     }
@@ -91,7 +97,6 @@ class ViewController: UIViewController,MainViewProtocol{
             self.navigationItem.searchController = isSearch ? self.searchController : nil
             if self.viewmodel.numberOfRows()>0{
                 //if item exist, move back to up
-                
                 self.mCollectionView.scrollsToTop = true
             }
             if isSearch{
@@ -101,11 +106,12 @@ class ViewController: UIViewController,MainViewProtocol{
         }
     }
     
-    func updateListStyle(isSearch:Bool){
+    func updateListStyle(layout:ListLayoutStyle){
         DispatchQueue.main.async {
             UIView.animate(withDuration: 0.3) {
 //                change the style
-                self.styleButton.image = UIImage(systemName: isSearch ? "list.bullet.rectangle" : "tablecells.fill")
+                self.styleButton.image = UIImage(systemName: layout == .table ? "list.bullet.rectangle" : "tablecells.fill")
+                self.reloadData()
             }
         }
     }
@@ -115,14 +121,11 @@ class ViewController: UIViewController,MainViewProtocol{
         if sender.tag == 1{
             //searchbar clicked
             viewmodel.isSearch()
-        }else if sender.tag == 2{
+        }else {
             //style button clicked
-            viewmodel.isListStyle()
-        }else{
-            //favorited clicked
+            viewmodel.changeListStyle()
         }
     }
-    
     
     func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
@@ -146,4 +149,7 @@ class ViewController: UIViewController,MainViewProtocol{
         }
     }
     
+    func getViewFrame()->CGFloat{
+        return self.view.bounds.width
+    }
 }

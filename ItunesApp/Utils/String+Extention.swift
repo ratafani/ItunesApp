@@ -9,9 +9,13 @@ import Foundation
 
 extension String {
     func limit(num:Int) -> String {
-        if self.count>num{
-            return dropLast(num) + "***"
+        var s = self
+        if s.count > num + 3{
+            while s.count >= num {
+                s.remove(at: s.index(before: s.endIndex))
+            }
+            s.append("...")
         }
-        return self
+        return s
     }
 }

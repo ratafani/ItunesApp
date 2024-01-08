@@ -15,18 +15,22 @@ protocol ListViewModelProtocol {
     func search(term:String,lim:Int?,country:String?)
     func reset()
     func isSearch()
-    func isListStyle()
+    func changeListStyle()
     func favoriteForRowAt(_ index: Int)
+    func cellSize()->(CGFloat,String)
+}
+
+enum ListLayoutStyle{
+    case table
+    case twoGrid
 }
 
 class ListViewModel : ObservableObject,ListViewModelProtocol{
     
-    
-    
     @Published var movies: [Movie] = []
     @Published var localMovies: [Movie] = []
     @Published var isSearching : Bool = false
-    @Published var isListStyleTable : Bool = true
+    @Published var layoutStyle : ListLayoutStyle = .twoGrid
     
     private var cancellables = Set<AnyCancellable>()
     private unowned let view: MainViewProtocol
@@ -43,7 +47,6 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
         }else{
             return nil
         }
-        
     }
     
     func numberOfRows() -> Int {
@@ -66,7 +69,7 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
         }
         listenIsStyle { [weak self] val in
             guard let self = self else {return}
-            self.view.updateListStyle(isSearch: val)
+            self.view.updateListStyle(layout: val)
         }
     }
     
@@ -121,10 +124,14 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
             }
         }
     }
-    func isListStyle(){
+    
+    func changeListStyle(){
         DispatchQueue.main.async {
-            UIView.animate(withDuration: 1) {
-                self.isListStyleTable.toggle()
+            switch self.layoutStyle {
+            case .table:
+                self.layoutStyle = .twoGrid
+            case .twoGrid:
+                self.layoutStyle = .table
             }
         }
     }
@@ -149,8 +156,8 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
             .store(in: &cancellables)
     }
     
-    func listenIsStyle(onListen: @escaping (Bool)->Void){
-        $isListStyleTable
+    func listenIsStyle(onListen: @escaping (ListLayoutStyle)->Void){
+        $layoutStyle
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .removeDuplicates()
             .sink{ val in
@@ -159,6 +166,8 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
             }
             .store(in: &cancellables)
     }
+    
+    
     
     func reloadData(){
         
@@ -178,9 +187,16 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
                     self.reloadData()
                 }
             }
-            
-            
         }
         
+    }
+    
+    func cellSize() -> (CGFloat,String) {
+        switch layoutStyle {
+        case .table:
+            return (view.getViewFrame() * 0.96,"Small")
+        case .twoGrid:
+            return (view.getViewFrame() / 2.255 ,"Large")
+        }
     }
 }
