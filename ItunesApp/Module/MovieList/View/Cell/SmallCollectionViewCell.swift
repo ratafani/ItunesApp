@@ -100,7 +100,7 @@ class SmallCollectionViewCell: UICollectionViewCell,BaseCell {
     }
     
     func configure(with movie:Movie){
-        nameLabel.text = movie.trackName?.limit(num: 30)
+        nameLabel.text = movie.trackName?.limit(num: 25)
         priceLabel.text = (movie.trackPrice != nil) ? "$ \(movie.trackPrice!)" : "no price available"
         genreLabel.text = movie.primaryGenreName ?? "no genre available"
         rowImage.downloaded(from:movie.artworkUrl100 ?? ""){

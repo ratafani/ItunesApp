@@ -90,17 +90,17 @@ class LargeCollectionViewCell: UICollectionViewCell,BaseCell {
         favorite.heightAnchor.constraint(equalToConstant: 25).isActive = true
         favorite.widthAnchor.constraint(equalToConstant: 25).isActive = true
         
-        genreLabel.bottomAnchor.constraint(equalTo: bottomAnchor,constant: -8).isActive = true
-        genreLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16).isActive = true
+        genreLabel.bottomAnchor.constraint(equalTo: priceLabel.topAnchor,constant: -8).isActive = true
+        genreLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 8).isActive = true
 //        genreLabel.rightAnchor.constraint(equalTo: favorite.leftAnchor, constant: 16).isActive = true
         
         priceLabel.bottomAnchor.constraint(equalTo: bottomAnchor,constant: -8).isActive = true
-        priceLabel.leftAnchor.constraint(equalTo: genreLabel.rightAnchor, constant: 8).isActive = true
+        priceLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 8).isActive = true
 //        genreLabel.rightAnchor.constraint(equalTo: favorite.leftAnchor, constant: 16).isActive = true
         
         nameLabel.bottomAnchor.constraint(equalTo: genreLabel.topAnchor,constant: -8).isActive = true
-        nameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16).isActive = true
-        nameLabel.rightAnchor.constraint(equalTo: favorite.leftAnchor, constant: 16).isActive = true
+        nameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 8).isActive = true
+        nameLabel.rightAnchor.constraint(equalTo: favorite.leftAnchor, constant: 8).isActive = true
         
         
         favorite.addTarget(self, action: #selector(pressedAction(_:)), for: .touchUpInside)
@@ -125,8 +125,8 @@ class LargeCollectionViewCell: UICollectionViewCell,BaseCell {
     }
     
     func configure(with movie:Movie){
-        nameLabel.text = movie.trackName?.limit(num: 30)
-        priceLabel.text = (movie.trackPrice != nil) ? "$ \(movie.trackPrice!)" : "no price available"
+        nameLabel.text = movie.trackName?.limit(num: 25)
+        priceLabel.text = (movie.trackPrice != nil) ? "$\(movie.trackPrice!)" : "no price available"
         genreLabel.text = movie.primaryGenreName ?? "no genre available"
       
         rowImage.downloaded(from:movie.artworkUrl100 ?? ""){

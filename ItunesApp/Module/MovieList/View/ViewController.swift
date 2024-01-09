@@ -18,14 +18,8 @@ protocol MainViewProtocol: AnyObject {
 
 class ViewController: UIViewController,MainViewProtocol{
 
-    struct SearchControllerRestorableState {
-        var wasActive = false
-        var wasFirstResponder = false
-    }
     
     weak var coordinator : MainCoordinator?
-    
-    var restoredState = SearchControllerRestorableState()
     
     var viewmodel: ListViewModelProtocol!
     
@@ -76,6 +70,8 @@ class ViewController: UIViewController,MainViewProtocol{
     override func viewDidLoad() {
         super.viewDidLoad()
         viewmodel.viewDidLoad()
+        
+        
     }
     
     override func viewDidLayoutSubviews() {
@@ -110,13 +106,14 @@ class ViewController: UIViewController,MainViewProtocol{
         mCollectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
         mCollectionView.topAnchor.constraint(equalTo: self.favoriteCollectionView.bottomAnchor,constant: 8).isActive = true
 //
-        
-        
         //setup searchbar
         searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = self
         searchController.delegate = self
         searchController.searchBar.delegate = self
+        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.obscuresBackgroundDuringPresentation = false
+        self.definesPresentationContext = false
         
         //setup navbar items
         let search = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .plain, target: self, action:  #selector(self.onItemBarClick(_ :)))
@@ -169,17 +166,6 @@ class ViewController: UIViewController,MainViewProtocol{
     
     func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        
-        // Restore the searchController's active state.
-        if restoredState.wasActive {
-            searchController.isActive = restoredState.wasActive
-            restoredState.wasActive = false
-            
-            if restoredState.wasFirstResponder {
-                searchController.searchBar.becomeFirstResponder()
-                restoredState.wasFirstResponder = false
-            }
-        }
     }
     
     //MARK: -reload all the collection view
