@@ -20,10 +20,17 @@ HiTunes is a showcase project that demonstrates the usage of the iTunes Search A
 - **Generic Network Layer:** Demonstrates the use of a Combine in network layer for chaining and handling API requests.
 - **CoreData:** Utilizes CoreData as the persistence framework for the app.
 
-<img src="https://github.com/ratafani/hitunes/assets/9950770/bdcc9baf-cb62-4a45-814c-ca7ca3a62663" width="400" alt="Simulator Screenshot - iPhone 15 Pro - 2024-01-09 at 21 28 47">
+<table>
+  <tr>
+    <!-- Each column contains an image with a specified width -->
+    <td><img src="https://github.com/ratafani/hitunes/assets/9950770/49a34b8d-c784-497c-9c4f-32c560d607e1" width="200" alt="Screenshot 1"></td>
+    <td><img src="https://github.com/ratafani/hitunes/assets/9950770/79726e48-b2a6-465d-aa21-5b144dc29d20" width="200" alt="Screenshot 2"></td>
+    <td><img src="https://github.com/ratafani/hitunes/assets/9950770/4408c0dd-0357-439f-9da1-09316d221d22" width="200" alt="Screenshot 3"></td>
+    <td><img src="https://github.com/ratafani/hitunes/assets/9950770/676a0160-0349-4373-bc80-e34d0acdfb48" width="200" alt="Screenshot 3"></td>
+  </tr>
+</table>
 
 
-https://github.com/ratafani/hitunes/assets/9950770/79726e48-b2a6-465d-aa21-5b144dc29d20
-https://github.com/ratafani/hitunes/assets/9950770/a1841635-d2a4-4636-a853-0fc2a1b60858
-https://github.com/ratafani/hitunes/assets/9950770/dcd4374c-7def-4b29-9d8e-86a3a5aecc56
+
+
 
