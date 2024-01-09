@@ -9,8 +9,8 @@ import UIKit
 import Combine
 
 protocol ListViewModelProtocol {
-    func cellForRowAt(_ index: Int) -> Movie?
-    func numberOfRows() -> Int
+    func cellForRowAt(_ index: Int,isFavorite: Bool) -> Movie?
+    func numberOfRows(isFavorite:Bool) -> Int
     func viewDidLoad()
     func search(term:String,lim:Int?,country:String?)
     func reset()
@@ -28,32 +28,47 @@ enum ListLayoutStyle{
 
 class ListViewModel : ObservableObject,ListViewModelProtocol{
     
-    
-    
     @Published var movies: [Movie] = []
     @Published var localMovies: [Movie] = []
     @Published var isSearching : Bool = false
     @Published var layoutStyle : ListLayoutStyle = .twoGrid
     
     private var cancellables = Set<AnyCancellable>()
+    //MARK: - only observing through protocols
     private unowned let view: MainViewProtocol
+    
     private var service = MovieService()
     
     init( view: MainViewProtocol) {
         self.view = view
         reset()
     }
-    
-    func cellForRowAt(_ index: Int) -> Movie? {
-        if movies.count > index{
-            return movies[index]
+    //MARK: - to get movie from indexpath
+    func cellForRowAt(_ index: Int,isFavorite: Bool) -> Movie? {
+        if isFavorite{
+            if localMovies.count > index{
+                return localMovies[index]
+            }else{
+                return nil
+            }
         }else{
-            return nil
+            if movies.count > index{
+                return movies[index]
+            }else{
+                return nil
+            }
         }
+        
     }
     
-    func numberOfRows() -> Int {
-        movies.count
+    //MARK: - getting the number of movie available both in local or from API
+    // isfavorite shows if we are looking from coredata or from API Research
+    func numberOfRows(isFavorite:Bool) -> Int {
+        if isFavorite{
+            return localMovies.count
+        }else{
+            return movies.count
+        }
     }
     
     func isSearch() {
@@ -62,14 +77,27 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
     
     func viewDidLoad() {
         view.configureView()
+        readLocalDB()
+        
+        
+        //MARK: - listening to publisher and update data if any
         listenIsDataChange { [weak self] movies in
             guard let self = self else {return}
             self.view.reloadData()
         }
+        
+        listenIsLocalDataChange { [weak self] movies in
+            guard let self = self else {return}
+            self.view.reloadData()
+        }
+        
+        //MARK: - search bar update if hidden or active
         listenIsSearching { [weak self] val in
             guard let self = self else {return}
             self.view.updateSearchbar(isSearch: val)
         }
+        //MARK: - observe the active layout style for the search result
+        // its eather table style or 2 column style
         listenIsStyle { [weak self] val in
             guard let self = self else {return}
             self.view.updateListStyle(layout: val)
@@ -99,6 +127,7 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
             .store(in: &cancellables)
     }
     
+    //MARK: - get favorites from the search result from the api to the local data
     func getFavorites(){
         let res = self.movies.reduce([]) { (result, movie) -> [Movie] in
             var updatedResult = result
@@ -120,14 +149,10 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
     func reset() {
         DispatchQueue.main.async {
             self.movies = []
-            self.service.readLocal { [weak self] movies in
-                self?.localMovies = movies
-                self?.movies = self?.localMovies ?? []
-            }
         }
     }
     
-    
+    //MARK: - change the style layout
     func changeListStyle(){
         DispatchQueue.main.async {
             switch self.layoutStyle {
@@ -146,12 +171,24 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
             .sink{ val in
                 onListen(val)
             }
-            
             .store(in: &cancellables)
     }
     
+    func listenIsLocalDataChange(onListen: @escaping ([Movie])->Void){
+        $localMovies
+            .debounce(for: 0.1, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink{ val in
+                onListen(val)
+            }
+            .store(in: &cancellables)
+    }
+    
+    
+    
     func listenIsSearching(onListen: @escaping (Bool)->Void){
         $isSearching
+        
             .debounce(for: 0.1, scheduler: RunLoop.main)
             .removeDuplicates()
             .sink{ val in
@@ -171,45 +208,58 @@ class ListViewModel : ObservableObject,ListViewModelProtocol{
             .store(in: &cancellables)
     }
     
-    func reloadData(){
-        self.movies = movies.sorted(by: {$0.isFavorites && !$1.isFavorites})
+    //MARK: -read the Coredata and update the UI
+    func readLocalDB(){
+        self.service.readLocal { [weak self] movies in
+            self?.localMovies = movies
+            self?.getFavorites()
+        }
+        
     }
     
+    //MARK: - function to favorite based on selected movie
     func favoriteForRowAt(_ movie: Movie){
         guard let index = findMovie(movie: movie) else {return}
         if movies.count > index{
             movies[index].isFavorites.toggle()
             if movies[index].isFavorites{
-                service.saveLocal(movie: movies[index]) { [weak self] movie in
+                service.saveLocal(movie: movies[index]) { [weak self] success in
                     guard let self else {return}
-                    self.reloadData()
+                    
+                    self.readLocalDB()
                 }
             }else{
                 service.deleteLocal(movie: movies[index]) { [weak self] val in
                     guard let self else {return}
-                    self.reloadData()
+                    
+                    self.readLocalDB()
                 }
             }
         }
     }
     
+    //MARK: - looking for movie in API result
     func findMovie(movie: Movie) -> Int?{
         let m = self.movies.firstIndex(where: {$0.id == movie.id})
         let index = m ?? 0
         return index
     }
     
+    //MARK: - logic to calculate the cell size based on active collection layout
     func cellSize() -> (CGFloat,String) {
         switch layoutStyle {
         case .table:
             return (view.getViewFrame() * 0.96,"Small")
         case .twoGrid:
-            return (view.getViewFrame() / 2.255 ,"Large")
+            return (view.getViewFrame() / 2 - 10 ,"Large")
         }
     }
     
+    
+    //MARK: - to update the conncetion when collectionview is tapped
     func changeListMovie(by movie: Movie) {
         let arr = self.movies.map({$0.id == movie.id ? movie : $0})
         self.movies = arr
+        readLocalDB()
     }
 }

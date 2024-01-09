@@ -40,7 +40,33 @@ class ViewController: UIViewController,MainViewProtocol{
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
         collectionView.register(SmallCollectionViewCell.self, forCellWithReuseIdentifier: "Small")
         collectionView.register(LargeCollectionViewCell.self, forCellWithReuseIdentifier: "Large")
+        collectionView.register(LastVisitReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: LastVisitReusableView.reuseIdentifier)
+
         return collectionView
+    }()
+    
+    lazy var favoriteCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.backgroundColor = .init(white: 1, alpha: 0.2)
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
+        collectionView.register(FavCollectionViewCell.self, forCellWithReuseIdentifier: "Favorite")
+        collectionView.register(LastVisitReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: LastVisitReusableView.reuseIdentifier)
+        return collectionView
+    }()
+    
+    var titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .light)
+        label.textColor = UIColor.black
+        label.text = "Favorites :"
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     var searchController: UISearchController!
@@ -57,7 +83,24 @@ class ViewController: UIViewController,MainViewProtocol{
     }
     
     func configureView() {
+        
+        self.view.addSubview(titleLabel)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 110).isActive = true
+        titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor,constant: 8).isActive = true
+        titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor,constant: 8).isActive = true
+        
         //setup table
+        favoriteCollectionView.delegate = self
+        favoriteCollectionView.dataSource = self
+        self.view.addSubview(self.favoriteCollectionView)
+        favoriteCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        favoriteCollectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+        favoriteCollectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        favoriteCollectionView.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor,constant: 4).isActive = true
+        favoriteCollectionView.heightAnchor.constraint(equalToConstant: 180).isActive = true
+       
+        
         mCollectionView.delegate = self
         mCollectionView.dataSource = self
         self.view.addSubview(self.mCollectionView)
@@ -65,7 +108,8 @@ class ViewController: UIViewController,MainViewProtocol{
         mCollectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
         mCollectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         mCollectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-        mCollectionView.topAnchor.constraint(equalTo: self.view.topAnchor,constant: 100).isActive = true
+        mCollectionView.topAnchor.constraint(equalTo: self.favoriteCollectionView.bottomAnchor,constant: 8).isActive = true
+//
         
         
         //setup searchbar
@@ -78,22 +122,20 @@ class ViewController: UIViewController,MainViewProtocol{
         let search = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .plain, target: self, action:  #selector(self.onItemBarClick(_ :)))
         search.tag = 1
         
-        //NOTE: wanted to have list of fatorites access here
-//        let favoritesButton = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action:  #selector(self.onItemBarClick(_ :)))
-//        favoritesButton.tag = 3
-        
         styleButton = UIBarButtonItem(image: UIImage(systemName: "list.bullet.rectangle"), style: .plain, target: self, action:  #selector(self.onItemBarClick(_ :)))
         styleButton.tag = 2
     
         self.navigationItem.setRightBarButtonItems([search,styleButton], animated: false)
+
         self.navigationItem.title = "List Movies"
         
     }
-    
+    //MARK: - to observe of searchar is in focus
+    // when the focus was not in top of collection view, it should reload the table and go to the top of collection
     func updateSearchbar(isSearch:Bool) {
         DispatchQueue.main.async {
             self.navigationItem.searchController = isSearch ? self.searchController : nil
-            if self.viewmodel.numberOfRows()>0{
+            if self.viewmodel.numberOfRows(isFavorite: false)>0{
                 //if item exist, move back to up
                 self.mCollectionView.scrollsToTop = true
             }
@@ -103,7 +145,7 @@ class ViewController: UIViewController,MainViewProtocol{
             }
         }
     }
-    
+    //MARK: - update the layout style
     func updateListStyle(layout:ListLayoutStyle){
         DispatchQueue.main.async {
             UIView.animate(withDuration: 0.3) {
@@ -114,7 +156,7 @@ class ViewController: UIViewController,MainViewProtocol{
         }
     }
 
-    
+    //MARK: -function to listen all navbar item event
     @objc func onItemBarClick(_ sender: UIBarButtonItem){
         if sender.tag == 1{
             //searchbar clicked
@@ -140,10 +182,12 @@ class ViewController: UIViewController,MainViewProtocol{
         }
     }
     
+    //MARK: -reload all the collection view
     func reloadData() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else {return}
             self.mCollectionView.reloadData()
+            self.favoriteCollectionView.reloadData()
         }
     }
     

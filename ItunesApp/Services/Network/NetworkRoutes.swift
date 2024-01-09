@@ -7,6 +7,7 @@
 
 import Foundation
 
+//Base API route preparation
 enum NetworkRoutes{
     case search
     case lookup
@@ -39,6 +40,7 @@ enum NetworkRoutes{
     }
 }
 
+//MARK: Prepared to all media type other than movie
 enum MediaType : String{
     case movie
     case podcast

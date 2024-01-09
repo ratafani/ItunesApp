@@ -49,6 +49,26 @@ class DetailViewController: UIViewController,DetailViewControllerProtocol {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+    var genreLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = UIColor.black
+        label.text = "$5"
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    var priceLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        label.textColor = UIColor.black
+        label.text = "Bob Lee"
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
 
     private let descriptionLabel: UILabel = {
         let label = UILabel()
@@ -74,6 +94,8 @@ class DetailViewController: UIViewController,DetailViewControllerProtocol {
         view.addSubview(imageView)
         view.addSubview(titleLabel)
         view.addSubview(descriptionLabel)
+        view.addSubview(genreLabel)
+        view.addSubview(priceLabel)
         
         favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
 
@@ -97,8 +119,17 @@ class DetailViewController: UIViewController,DetailViewControllerProtocol {
             titleLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-
-            descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            
+            genreLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            genreLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+//            genreLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
+            priceLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            priceLabel.leadingAnchor.constraint(equalTo: genreLabel.trailingAnchor, constant: 8),
+            priceLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
+            
+            descriptionLabel.topAnchor.constraint(equalTo: genreLabel.bottomAnchor, constant: 8),
             descriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             descriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
         ])
@@ -106,18 +137,21 @@ class DetailViewController: UIViewController,DetailViewControllerProtocol {
 
     func updateUI() {
         guard let movie = viewModel?.getMovie() else { return }
-        // Update UI components with movie details
-        imageView.downloaded(from: movie.artworkUrl100 ?? "") {
-            
-        }  // Replace with your image
-        titleLabel.text = movie.trackName
-        descriptionLabel.text = movie.longDescription
-        
-        if movie.isFavorites{
-            favoriteButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
-        }else{
-            favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
+
+        imageView.downloaded(from: movie.artworkUrl100 ?? "") {}
+       
+        DispatchQueue.main.async {
+            self.titleLabel.text = movie.trackName
+            self.descriptionLabel.text = movie.longDescription
+            self.priceLabel.text = (movie.trackPrice != nil) ? "$ \(movie.trackPrice!)" : "no price available"
+            self.genreLabel.text = movie.primaryGenreName ?? "no genre available"
+            if movie.isFavorites{
+                self.favoriteButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
+            }else{
+                self.favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
+            }
         }
+       
     }
 
     @objc private func favoriteButtonTapped() {

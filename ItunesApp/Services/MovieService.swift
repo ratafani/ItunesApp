@@ -19,11 +19,15 @@ protocol MovieServiceProtocol {
 
 final class MovieService : MovieServiceProtocol{
     
+    let network : NetworkLayer = NetworkLayer()
+    
+    //MARK: get spesific movie from id
     func lookupMovie(amgVideoId: String) -> AnyPublisher<BaseResults<Movie>, Error> {
         let args : [String:String] = ["amgVideoId":amgVideoId]
-        return NetworkLayer.shared.request(router: .lookup, args: args)
+        return network.request(router: .lookup, args: args)
     }
     
+    //MARK: search movies from with possibility based on country
     func searchMovie(term: String, country: String?, limit: Int?) -> AnyPublisher<BaseResults<Movie>, Error> {
         
         var args : [String:String] = ["term":term,"media":"movie"]
@@ -33,16 +37,20 @@ final class MovieService : MovieServiceProtocol{
         if let limit{
             args["limit"] = "\(limit)"
         }
-        return NetworkLayer.shared.request(router: .search, args: args)
+        return network.request(router: .search, args: args)
     }
     
+    //MARK: save it to coredata
     func saveLocal(movie:Movie,onSuccess:@escaping (Movie)->Void){
         CoreDataHelper.shared.create(type: MovieEntity.self) { (new: MovieEntity) in
+            //MARK: create entity model based on movie obj
             new.update(with: movie)
+        } completion: { m in
+            onSuccess(m.createMovie())
         }
-
     }
     
+    //MARK: get all fav movie from coredata
     func readLocal(onSuccess:@escaping ([Movie])->Void){
         CoreDataHelper.shared.fetch(type: MovieEntity.self, predicate: nil) { movies in
             guard let movies = movies else {
@@ -58,6 +66,7 @@ final class MovieService : MovieServiceProtocol{
         }
     }
     
+    //MARK: delete movie from coredata
     func deleteLocal(movie:Movie,onSuccess:@escaping (Bool)->Void){
         do{
             let obj =  try CoreDataHelper.shared.getContext().existingObject(with: movie.id)

@@ -10,7 +10,7 @@ import UIKit
 import Combine
 
 protocol CoreDataHelperProtocol {
-    func create<T:NSManagedObject>(type: T.Type, completion: @escaping ((T) -> Void))
+    func create<T:NSManagedObject>(type: T.Type, create: @escaping ((T) -> Void),completion: @escaping ((T) -> Void))
     func fetch<T>(type: T.Type, predicate: NSPredicate?, completion: @escaping (([T]?) -> Void))
     func fetch<T>(type: T.Type, predicate: NSPredicate?, sortDescriptors: [NSSortDescriptor]?, completion: @escaping (([T]?) -> Void))
     func fetchCount<T>(type: T.Type, predicate: NSPredicate, completion: @escaping ((Int) -> Void))
@@ -18,16 +18,19 @@ protocol CoreDataHelperProtocol {
     func delete<T: NSManagedObject>(object: T, completion: @escaping ((Bool) -> Void))
 }
 
-
+//MARK: Generic Coredata layer, it can
 class CoreDataHelper:CoreDataHelperProtocol{
     
-    static let shared = CoreDataHelper()
-    private init() {
+    static let shared = CoreDataHelper(container: "Movies")
+    let containerName : String!
+    
+    private init(container name:String) {
+        self.containerName = name
         // Private initializer to enforce singleton pattern
     }
     
     lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "Movies") // Replace with your data model name
+        let container = NSPersistentContainer(name: containerName)
         container.loadPersistentStores { (_, error) in
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
@@ -40,11 +43,12 @@ class CoreDataHelper:CoreDataHelperProtocol{
         return persistentContainer.viewContext
     }
     
-    func create<T:NSManagedObject>(type: T.Type, completion: @escaping ((T) -> Void)) {
+    func create<T:NSManagedObject>(type: T.Type, create: @escaping ((T) -> Void),completion: @escaping ((T) -> Void)) {
         persistentContainer.performBackgroundTask { context in
             let newObject = T(entity: T.entity(), insertInto: context)
-            completion(newObject)
+            create(newObject)
             try? context.save()
+            completion(newObject)
         }
     }
     

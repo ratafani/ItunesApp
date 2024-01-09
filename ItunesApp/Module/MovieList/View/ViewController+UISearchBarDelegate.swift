@@ -19,9 +19,8 @@ extension ViewController : UISearchBarDelegate, UISearchDisplayDelegate, UISearc
     
     @objc func output(){
         if timer.userInfo != nil {
-            
             let s = timer.userInfo as? String ?? ""
-            print(s)
+//            print(s)
             DispatchQueue.main.async {
                 self.viewmodel.search(term: s, lim: nil, country: nil)
             }

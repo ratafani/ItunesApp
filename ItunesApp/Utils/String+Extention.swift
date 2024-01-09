@@ -7,6 +7,8 @@
 
 import Foundation
 
+
+//MARK: to limit the lenght of string
 extension String {
     func limit(num:Int) -> String {
         var s = self

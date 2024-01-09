@@ -3,16 +3,16 @@ import Foundation
 import CoreData
 
 
-// MARK: - Result
+// MARK: - from API model
 struct Movie: Codable,Equatable {
     var id: NSManagedObjectID = NSManagedObjectID()
-    let wrapperType: WrapperType?
-    let kind: Kind?
+    let wrapperType: WrapperType? // --
+    let kind: Kind? // --
     let collectionID: Int?
     let trackID: Int?
-    let artistName: String?
+    let artistName: String? // --
     let collectionName: String?
-    let trackName: String?
+    let trackName: String? // --
     let collectionCensoredName: String?
     let trackCensoredName: String?
     let collectionArtistID: Int?

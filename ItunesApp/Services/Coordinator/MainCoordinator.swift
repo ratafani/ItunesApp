@@ -18,7 +18,7 @@ protocol Coordinator{
 class MainCoordinator : Coordinator{
     var childCoordinator: [Coordinator] = []
     
-    
+    //MARK: setup navigation controller
     var navigationController: UINavigationController = {
         var controller = UINavigationController()
         controller.navigationBar.prefersLargeTitles = false
@@ -32,12 +32,17 @@ class MainCoordinator : Coordinator{
         
     }()
     
+    //MARK: setup initial view controller
     func startCoordinator() {
         let mainVC = ViewControllerProvider.mainViewController.raw as! ViewController
         mainVC.coordinator = self
         navigationController.pushViewController(mainVC, animated: false)
+        
     }
 
+    //MARK: go to detail viewcontroller with combine listener
+    // listenToMovie is being initiate,
+    // so that the publisher is being observed to the first viewmodel
     func showDetail(movie : Movie,onListen: @escaping (Movie)->Void){
         let detailVC = ViewControllerProvider.detailViewController(movie: movie).raw as! DetailViewController
         
@@ -47,6 +52,7 @@ class MainCoordinator : Coordinator{
         navigationController.pushViewController(detailVC, animated: true)
     }
 }
+
 
 
 enum ViewControllerProvider {
@@ -59,6 +65,7 @@ enum ViewControllerProvider {
         case .mainViewController:
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let vc = storyboard.instantiateViewController(identifier: "ListViewController") as! ViewController
+            //MARK: both view and viewmodel are being restricted by the protocols
             let viewmodel = ListViewModel(view: vc)
             vc.viewmodel = viewmodel
             return vc

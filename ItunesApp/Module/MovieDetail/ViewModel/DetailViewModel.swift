@@ -16,12 +16,15 @@ protocol DetailViewModelProtocol{
     func viewDidLoad()
 }
 
+//MARK: - Detail ViewModel
 class DetailViewModel : ObservableObject,DetailViewModelProtocol{
+    
     @Published var moviePublisher : Movie?
     private var cancellables = Set<AnyCancellable>()
     private var service = MovieService()
     
     var view : DetailViewControllerProtocol
+    
     
     init(movie:Movie, view: DetailViewControllerProtocol){
         self.moviePublisher = movie
@@ -29,6 +32,7 @@ class DetailViewModel : ObservableObject,DetailViewModelProtocol{
     }
     
     func viewDidLoad() {
+        //MARK: - listening to publisher change and update the ui if any change happened
         listenToMovie { [weak self] movie in
             guard let self else {return}
             self.view.updateUI()
@@ -47,12 +51,14 @@ class DetailViewModel : ObservableObject,DetailViewModelProtocol{
             .store(in: &cancellables)
     }
     
+    //MARK: - events to save / update models to coredata
     func favorite(){
         moviePublisher?.isFavorites.toggle()
         guard let movie = moviePublisher else {return}
         if movie.isFavorites{
             service.saveLocal(movie: movie) { [weak self] m in
                 guard let self else {return}
+                moviePublisher = m
                 self.view.updateUI()
             }
         }else{
@@ -64,7 +70,10 @@ class DetailViewModel : ObservableObject,DetailViewModelProtocol{
     }
     
     func reloadData(){
-        self.view.updateUI()
+        DispatchQueue.main.async {
+            self.view.updateUI()
+        }
+        
     }
     
     func getMovie()->Movie?{

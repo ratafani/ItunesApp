@@ -14,14 +14,14 @@ protocol BaseCell: UICollectionViewCell{
     var favoriteButtonTap : ()->Void { get set }
     func addViews()
     func setFavoriteImagge(isFavorite : Bool)
+    func configure(with movie:Movie)
 }
 
 class LargeCollectionViewCell: UICollectionViewCell,BaseCell {
-    
-    
+
     var rowImage: UIImageView = {
         let image = UIImageView()
-        image.image = UIImage(systemName: "person.crop.circle")
+        image.image = UIColor.lightGray.image()
         image.translatesAutoresizingMaskIntoConstraints = false
         
         return image
@@ -30,6 +30,26 @@ class LargeCollectionViewCell: UICollectionViewCell,BaseCell {
     var nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16)
+        label.textColor = UIColor.white
+        label.text = "Bob Lee"
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    var genreLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14)
+        label.textColor = UIColor.white
+        label.text = "$5"
+        label.numberOfLines = 0
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    var priceLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         label.textColor = UIColor.white
         label.text = "Bob Lee"
         label.numberOfLines = 0
@@ -57,6 +77,8 @@ class LargeCollectionViewCell: UICollectionViewCell,BaseCell {
         addSubview(rowImage)
         addSubview(nameLabel)
         addSubview(favorite)
+        addSubview(genreLabel)
+        addSubview(priceLabel)
         
         rowImage.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
         rowImage.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
@@ -68,9 +90,18 @@ class LargeCollectionViewCell: UICollectionViewCell,BaseCell {
         favorite.heightAnchor.constraint(equalToConstant: 25).isActive = true
         favorite.widthAnchor.constraint(equalToConstant: 25).isActive = true
         
-        nameLabel.bottomAnchor.constraint(equalTo: bottomAnchor,constant: -8).isActive = true
+        genreLabel.bottomAnchor.constraint(equalTo: bottomAnchor,constant: -8).isActive = true
+        genreLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16).isActive = true
+//        genreLabel.rightAnchor.constraint(equalTo: favorite.leftAnchor, constant: 16).isActive = true
+        
+        priceLabel.bottomAnchor.constraint(equalTo: bottomAnchor,constant: -8).isActive = true
+        priceLabel.leftAnchor.constraint(equalTo: genreLabel.rightAnchor, constant: 8).isActive = true
+//        genreLabel.rightAnchor.constraint(equalTo: favorite.leftAnchor, constant: 16).isActive = true
+        
+        nameLabel.bottomAnchor.constraint(equalTo: genreLabel.topAnchor,constant: -8).isActive = true
         nameLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 16).isActive = true
         nameLabel.rightAnchor.constraint(equalTo: favorite.leftAnchor, constant: 16).isActive = true
+        
         
         favorite.addTarget(self, action: #selector(pressedAction(_:)), for: .touchUpInside)
         
@@ -90,6 +121,18 @@ class LargeCollectionViewCell: UICollectionViewCell,BaseCell {
             favorite.setImage(UIImage(systemName: "star.fill"), for: .normal)
         }else{
             favorite.setImage(UIImage(systemName: "star"), for: .normal)
+        }
+    }
+    
+    func configure(with movie:Movie){
+        nameLabel.text = movie.trackName?.limit(num: 30)
+        priceLabel.text = (movie.trackPrice != nil) ? "$ \(movie.trackPrice!)" : "no price available"
+        genreLabel.text = movie.primaryGenreName ?? "no genre available"
+      
+        rowImage.downloaded(from:movie.artworkUrl100 ?? ""){
+            self.rowImage.editImage()
+            self.rowImage.contentMode = .scaleAspectFill
+            self.setFavoriteImagge(isFavorite: movie.isFavorites)
         }
     }
 }

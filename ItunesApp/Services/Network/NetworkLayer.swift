@@ -14,9 +14,7 @@ protocol NetworkLayerProtocol{
 }
 
 class NetworkLayer : NetworkLayerProtocol{
-    
-    static let shared = NetworkLayer()
-    
+    //MARK: generic network layer
     func request<T>(router: NetworkRoutes, args : [String:String]) -> AnyPublisher<T, Error> where T : Decodable {
         var components = URLComponents()
         components.scheme = router.scheme

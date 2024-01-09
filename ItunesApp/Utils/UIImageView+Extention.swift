@@ -8,9 +8,13 @@
 import UIKit
 //onListen: @escaping (Bool)->Void
 extension UIImageView {
+    //MARK: download image from network url
     func downloaded(from url: URL, contentMode mode: ContentMode = .scaleToFill, onSuccess:@escaping ()->Void) {
         //        contentMode = mode
-        self.image = UIImage(systemName: "circle.dotted")
+        DispatchQueue.main.async {
+            self.image = UIColor.lightGray.image()
+        }
+        
         URLSession.shared.dataTask(with: url) { data, response, error in
             guard
                 let httpURLResponse = response as? HTTPURLResponse, httpURLResponse.statusCode == 200,
@@ -26,6 +30,7 @@ extension UIImageView {
             }
         }.resume()
     }
+    //MARK: download from network using url in string
     func downloaded(from link: String, contentMode mode: ContentMode = .scaleAspectFit,onSuccess:@escaping ()->Void) {
         guard let url = URL(string: link) else { return }
         downloaded(from: url, contentMode: mode){
@@ -33,6 +38,7 @@ extension UIImageView {
         }
     }
     
+    //MARK: editing image to have radius
     func editImage(){
         if self.frame.width > 50{
             let view = UIView(frame: self.frame)
@@ -50,10 +56,18 @@ extension UIImageView {
             self.addSubview(view)
             self.bringSubviewToFront(view)
         }
-        
         self.layer.cornerRadius = 12/*self.frame.width / 2*/
         self.layer.masksToBounds = true
         
     }
     
+}
+
+extension UIColor {
+    func image(_ size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
+        return UIGraphicsImageRenderer(size: size).image { rendererContext in
+            self.setFill()
+            rendererContext.fill(CGRect(origin: .zero, size: size))
+        }
+    }
 }

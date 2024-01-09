@@ -8,6 +8,7 @@
 import Foundation
 import CoreData
 
+//MARK: extention from coredata entity so that can communicate with model from API
 extension MovieEntity{
     func update(with movie:Movie){
         self.artworkUrl60 = movie.artworkUrl60
@@ -17,6 +18,8 @@ extension MovieEntity{
         self.isFavorite = movie.isFavorites
         self.releaseDate = movie.releaseDate
         self.trackID = Int32(movie.trackID ?? 0)
+        self.primaryGenreName = movie.primaryGenreName
+        self.trackPrice = movie.trackPrice ?? 0.0
     }
     
     func createMovie() -> Movie {
@@ -41,7 +44,7 @@ extension MovieEntity{
             artworkUrl60: self.artworkUrl60,
             artworkUrl100: self.artworkUrl100,
             collectionPrice: nil,
-            trackPrice: nil,
+            trackPrice: self.trackPrice,
             trackRentalPrice: nil,
             collectionHDPrice: nil,
             trackHDPrice: nil,
@@ -54,7 +57,7 @@ extension MovieEntity{
             trackTimeMillis: nil,
             country: nil,
             currency: nil,
-            primaryGenreName: nil,
+            primaryGenreName: self.primaryGenreName,
             contentAdvisoryRating: nil,
             shortDescription: nil,
             longDescription: self.longDescription,
