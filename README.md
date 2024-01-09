@@ -1,19 +1,20 @@
-Hi tunes!
+# 🎵 HiTunes
 
-Its a project that show casing use case of iTunes search API.
-From showing list of movies, show the favorites movies, to detail of the movie.
+HiTunes is a showcase project that demonstrates the usage of the iTunes Search API. It allows users to search for movies, save their favorite movies locally, and view detailed information about each movie.
 
-build with **UIKit**, mostly programatically
-Using **MVVM** as based of architecture, and **Combine** for reactive framework.
-In this project also showcasing of using **Combine for chaining** and do API Request
-and build Generic Network Layer for that.
-This project use **Coredata** as persistence framework for the app.
+## Features 🚀
 
-Features:
-- Movie Search
-- Favorite Movie from the list and save it locally.
-- Listing all the favorite movies, no network needed.
-- Show detail information.
-- favorite movie from detail view and save it locally.
-- Data can be reactive to be listened or observed in the app.
+- **Movie Search:** Search for movies using the iTunes Search API.
+- **Favorite Movies:** Save favorite movies from the list locally.
+- **Favorites List:** View a list of all favorite movies without requiring network access.
+- **Detail View:** Explore detailed information about each movie.
+- **Save from Detail View:** Save favorite movies directly from the movie detail view.
+- **Reactive Data:** Utilizes Combine for reactive programming, allowing for easy observation of data changes within the app.
 
+## Tech Stack
+
+- **UIKit:** Built using UIKit for the user interface.
+- **MVVM Architecture:** Follows the Model-View-ViewModel architectural pattern.
+- **Combine Framework:** Leveraged for reactive programming and data binding.
+- **Generic Network Layer:** Demonstrates the use of a Combine in network layer for chaining and handling API requests.
+- **CoreData:** Utilizes CoreData as the persistence framework for the app.
