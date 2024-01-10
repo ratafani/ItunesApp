@@ -91,7 +91,7 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource,U
     // Add this method to set the size for the header view
        func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
            if collectionView == favoriteCollectionView{
-               return CGSize(width: 0, height: 0)
+               return .zero
            }else{
                return CGSize(width: self.view.bounds.width, height: 20)
            }
