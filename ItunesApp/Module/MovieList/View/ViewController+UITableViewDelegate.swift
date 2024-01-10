@@ -55,6 +55,8 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource,U
             let itemHeight = 160.0
             return CGSize(width: itemWidth, height: itemHeight) 
         }else{
+            //MARK: -update the size of cell based on choosen layout style
+            //there are 2 options, table layout, or 2 column layout
             let itemWidth = self.viewmodel.cellSize().0
             let itemHeight = self.viewmodel.cellSize().1 == "Small" ? 60.0 : 200.0
             return CGSize(width: itemWidth, height: itemHeight)
@@ -70,22 +72,14 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource,U
         4
     }
     
+    //MARK: - to setup the header
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        if collectionView == mCollectionView{
-            if kind == UICollectionView.elementKindSectionHeader {
-                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LastVisitReusableView.reuseIdentifier, for: indexPath) as! LastVisitReusableView
-                return headerView
-            }
-        }else{
-            if kind == UICollectionView.elementKindSectionHeader {
-                let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LastVisitReusableView.reuseIdentifier, for: indexPath) as! LastVisitReusableView
-                headerView.titleLabel.isHidden = true
-                return headerView
-            }
+        if kind == UICollectionView.elementKindSectionHeader {
+            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: LastVisitReusableView.reuseIdentifier, for: indexPath) as! LastVisitReusableView
+            headerView.titleLabel.isHidden = true
+            return headerView
         }
-      
         return UICollectionReusableView()
-        
     }
     
     // Add this method to set the size for the header view
@@ -102,6 +96,7 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource,U
         self.reloadData()
     }
     
+    //MARK: - use coordinator to show detail, and observer to viewmodel from detail
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         if collectionView == favoriteCollectionView{
